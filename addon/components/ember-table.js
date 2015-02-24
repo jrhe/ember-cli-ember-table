@@ -438,6 +438,10 @@ EmberTableComponent = Ember.Component.extend(StyleBindingsMixin, {
     return Math.floor(this.get('_bodyHeight') / this.get('rowHeight'));
   }).property('_bodyHeight', 'rowHeight'),
 
+  _endIndex: Ember.computed(function() {
+    return this.get('_startIndex') + this.get('_numItemsShowing');
+  }).property('_startIndex', '_numItemsShowing'),
+
   _startIndex: Ember.computed(function() {
     var index, numContent, numViews, rowHeight, scrollTop;
     numContent = this.get('bodyContent.length');
@@ -544,6 +548,10 @@ EmberTableComponent = Ember.Component.extend(StyleBindingsMixin, {
     }
   },
 
+  //Super hacky, refactor
+  _scrollToVertical: function(y) {
+    this.$('.ember-table-body-container .antiscroll-inner').scrollTop(y);
+  },
 
   keyDown: function (e) {
     if (e.keyCode === 38) {
@@ -582,8 +590,17 @@ EmberTableComponent = Ember.Component.extend(StyleBindingsMixin, {
     } else if (direction === 'down' && rowIndex !== this.get('bodyContent.length') - 1) {
       futureRowIndex = rowIndex + 1;
     } else {
-      futureRowIndex = rowIndex;
+      //We are at the end or the start so don't want to do anything
+      return;
     }
+    if (direction === 'down' && futureRowIndex + 1 > this.get('_endIndex')) {
+      this._scrollToVertical(this.get('_tableScrollTop') + this.get('rowHeight') * 4);
+    }
+
+    if (direction === 'up' && futureRowIndex - 1 < this.get('_startIndex')) {
+      this._scrollToVertical(this.get('_tableScrollTop') - this.get('rowHeight') * 4);
+    }
+
 
     // Clear current selection
     this.get('persistedSelection').clear();
