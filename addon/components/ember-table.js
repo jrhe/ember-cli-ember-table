@@ -622,8 +622,8 @@ EmberTableComponent = Ember.Component.extend(StyleBindingsMixin, ResizeHandlerMi
   findRow: function(content) {
     var row, _i, _len, _ref;
     _ref = this.get('bodyContent');
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      row = _ref[_i];
+    for (_i = 0, _len = _ref.get('length'); _i < _len; _i++) {
+      row = _ref.objectAt(_i);
       if (row.get('content') === content) {
         return row;
       }
