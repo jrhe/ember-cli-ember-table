@@ -2,13 +2,11 @@ import Ember from 'ember';
 import StyleBindingsMixin from '../mixins/style-bindings-mixin';
 import RowArrayController from '../controllers/row';
 import RowDefinition from '../row-definition';
-import { addResizeListener } from '../resize-detection';
+import ResizeMixin from 'ember-resize-mixin/main';
 
 /* global $ */
 
-var EmberTableComponent;
-
-EmberTableComponent = Ember.Component.extend(StyleBindingsMixin, {
+var EmberTableComponent = Ember.Component.extend(ResizeMixin, StyleBindingsMixin, {
   classNames: ['ember-table-tables-container'],
   classNameBindings: ['enableContentSelection:ember-table-content-selectable'],
 
@@ -248,17 +246,14 @@ EmberTableComponent = Ember.Component.extend(StyleBindingsMixin, {
   didInsertElement: function() {
     this._super();
     this.set('_tableScrollTop', 0);
-    return this.elementSizeDidChange();
+    Ember.run.next(this, this.elementSizeDidChange);
   },
-
-  addResizeListener: function() {
-    addResizeListener(this.get('element'), Ember.run.bind(this, this.elementSizeDidChange));
-  }.on("didInsertElement"),
 
   elementSizeDidChange: function() {
     if ((this.get('_state') || this.get('state')) !== 'inDOM') {
       return;
     }
+
     this.set('_width', this.$().parent().outerWidth());
     this.set('_height', this.$().parent().outerHeight());
 
@@ -266,8 +261,8 @@ EmberTableComponent = Ember.Component.extend(StyleBindingsMixin, {
     we need to wait for the table to be fully rendered before antiscroll can
     be used
      */
-    return Ember.run.next(this, this.updateLayout);
-  },
+    Ember.run.next(this, this.updateLayout);
+  }.on('resize'),
 
   updateLayout: function() {
 
